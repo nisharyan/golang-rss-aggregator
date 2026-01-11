@@ -16,10 +16,13 @@ import (
 // The pointer receiver allows the method to modify the apiConfig struct if
 // needed.
 func (apiConfig *apiConfig) createUserHandler(w http.ResponseWriter, r *http.Request) {
+	// Define a struct to parse the JSON request body and store the parameters
+	// needed to create a new user.
 	type parameters struct {
 		Name string `json:"name"`
 	}
 
+	// Parse the JSON request body.
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
 	err := decoder.Decode(&params)
@@ -40,5 +43,7 @@ func (apiConfig *apiConfig) createUserHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	// Respond with the custom user definition which is similar to as the
+	// database user definition but with customised json tags.
 	respondWithJSON(w, 200, databaseUsertoUser(user))
 }
