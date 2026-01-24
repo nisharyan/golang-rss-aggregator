@@ -10,11 +10,7 @@ import (
 	"github.com/nisharyan/golang-rss-aggregator/internal/database"
 )
 
-// readinessHandler handles the readiness probe requests.
-// The *apiConfig struct is passed to access the database if needed.
-// The * in the receiver indicates that this method has a pointer receiver.
-// The pointer receiver allows the method to modify the apiConfig struct if
-// needed.
+// createUserHandler handles the creation of a new user.
 func (apiConfig *apiConfig) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	// Define a struct to parse the JSON request body and store the parameters
 	// needed to create a new user.
@@ -45,5 +41,10 @@ func (apiConfig *apiConfig) createUserHandler(w http.ResponseWriter, r *http.Req
 
 	// Respond with the custom user definition which is similar to as the
 	// database user definition but with customised json tags.
+	respondWithJSON(w, 201, databaseUsertoUser(user))
+}
+
+// getUserHandler handles the retrieval of an existing user.
+func (apiConfig *apiConfig) getUserHandler(w http.ResponseWriter, r *http.Request, user database.User) {
 	respondWithJSON(w, 200, databaseUsertoUser(user))
 }

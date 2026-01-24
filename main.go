@@ -41,7 +41,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
 	}
-    log.Println("Successfully connected to the database.")
+	log.Println("Successfully connected to the database.")
 
 	apiConfig := &apiConfig{
 		DB: database.New(conn),
@@ -66,6 +66,18 @@ func main() {
 	v1Router.Get("/error", errorHandler)
 	// Register the create user handler.
 	v1Router.Post("/users", apiConfig.createUserHandler)
+	// Retrieve the created user handler.
+	v1Router.Get("/users", apiConfig.middlewareAuth(apiConfig.getUserHandler))
+	// Register the create feed handler.
+	v1Router.Post("/feeds", apiConfig.middlewareAuth(apiConfig.createFeedHandler))
+	// Register the get feeds handler.
+	v1Router.Get("/feeds", apiConfig.getFeedsHandler)
+	// Register the create feed_follow handler.
+	v1Router.Post("/feed_follows", apiConfig.middlewareAuth(apiConfig.createFeedFollowHandler))
+	// Register the get feed_follow handler.
+	v1Router.Get("/feed_follows", apiConfig.middlewareAuth(apiConfig.getFeedFollowsHandler))
+	// Register the delete feed_follow handler.
+	v1Router.Delete("/feed_follows/{feed_follow_id}", apiConfig.middlewareAuth(apiConfig.deleteFeedFollowHandler))
 
 	// Mount the v1 router on the main router.
 	router.Mount("/v1", v1Router)
