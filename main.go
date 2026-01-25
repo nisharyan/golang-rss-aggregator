@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -24,12 +25,6 @@ type apiConfig struct {
 }
 
 func main() {
-	rssFeed, err := urlToRSSFeed("https://feeds.bbci.co.uk/news/rss.xml")
-	if err != nil {
-		log.Fatalf("Error fetching RSS feed: %v", err)
-	}
-	fmt.Printf("Fetched RSS Feed: %+v\n", rssFeed)
-
 	godotenv.Load(".env")
 
 	portString := os.Getenv("PORT")
@@ -48,9 +43,12 @@ func main() {
 	}
 	log.Println("Successfully connected to the database.")
 
+	db := database.New(conn)
 	apiConfig := &apiConfig{
-		DB: database.New(conn),
+		DB: db,
 	}
+
+	go scrapeFeeds(10, time.Minute, db)
 
 	// Setup the http server with the router.
 	router := chi.NewRouter()
@@ -83,6 +81,8 @@ func main() {
 	v1Router.Get("/feed_follows", apiConfig.middlewareAuth(apiConfig.getFeedFollowsHandler))
 	// Register the delete feed_follow handler.
 	v1Router.Delete("/feed_follows/{feed_follow_id}", apiConfig.middlewareAuth(apiConfig.deleteFeedFollowHandler))
+	// Retrieve the user post handler.
+	v1Router.Get("/posts", apiConfig.middlewareAuth(apiConfig.getUserPostsHandler))
 
 	// Mount the v1 router on the main router.
 	router.Mount("/v1", v1Router)

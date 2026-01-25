@@ -48,3 +48,17 @@ func (apiConfig *apiConfig) createUserHandler(w http.ResponseWriter, r *http.Req
 func (apiConfig *apiConfig) getUserHandler(w http.ResponseWriter, r *http.Request, user database.User) {
 	respondWithJSON(w, 200, databaseUsertoUser(user))
 }
+
+// getUserPostsHandler retrieves posts for a specific user.
+func (apiConfig *apiConfig) getUserPostsHandler(w http.ResponseWriter, r *http.Request, user database.User) {
+	posts, err := apiConfig.DB.GetPostsByUser(r.Context(), database.GetPostsByUserParams{
+		UserID: user.ID,
+		Limit:  3,
+	})
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("Error fetching posts for user: %v", err))
+		return
+	}
+
+	respondWithJSON(w, 200, databasePostsToPost(posts))
+}

@@ -51,8 +51,8 @@ func databaseFeedtoFeed(dbFeed database.Feed) Feed {
 
 func databaseFeedstoFeeds(dbFeeds []database.Feed) []Feed {
 	customFeeds := make([]Feed, len(dbFeeds))
-	for _, dbFeed := range dbFeeds {
-		customFeeds = append(customFeeds, databaseFeedtoFeed(dbFeed))
+	for idx, dbFeed := range dbFeeds {
+		customFeeds[idx] = databaseFeedtoFeed(dbFeed)
 	}
 	return customFeeds
 }
@@ -87,9 +87,45 @@ func databaseFeedFollowToFeedFollow(dbFeedFollow database.FeedFollow) FeedFollow
 
 func databaseFeedFollowsToFeedFollows(dbFeedFollows []database.FeedFollow) []FeedFollow {
 	customFeedFollows := make([]FeedFollow, len(dbFeedFollows))
-	for _, dbFeedFollow := range dbFeedFollows {
-		customFeedFollows = append(customFeedFollows, databaseFeedFollowToFeedFollow(dbFeedFollow))
+	for idx, dbFeedFollow := range dbFeedFollows {
+		customFeedFollows[idx] = databaseFeedFollowToFeedFollow(dbFeedFollow)
 	}
 
 	return customFeedFollows
+}
+
+type Post struct {
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Title       string    `json:"title"`
+	Url         string    `json:"url"`
+	FeedID      uuid.UUID `json:"feed_id"`
+	Description *string   `json:"description"`
+	PublishedAt time.Time `json:"published_at"`
+}
+
+func databasePostToPost(dbPost database.Post) Post {
+	description := (*string)(nil)
+	if dbPost.Description.Valid {
+		description = &dbPost.Description.String
+	}
+
+	return Post{
+		ID:          dbPost.ID,
+		CreatedAt:   dbPost.CreatedAt,
+		UpdatedAt:   dbPost.UpdatedAt,
+		Title:       dbPost.Title,
+		Url:         dbPost.Url,
+		FeedID:      dbPost.FeedID,
+		Description: description,
+	}
+}
+
+func databasePostsToPost(dbPosts []database.Post) []Post {
+	customPosts := make([]Post, len(dbPosts))
+	for idx, dbPost := range dbPosts{
+		customPosts[idx] = databasePostToPost(dbPost)
+	}
+	return customPosts
 }
