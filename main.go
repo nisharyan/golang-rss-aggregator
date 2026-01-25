@@ -24,6 +24,11 @@ type apiConfig struct {
 }
 
 func main() {
+	rssFeed, err := urlToRSSFeed("https://feeds.bbci.co.uk/news/rss.xml")
+	if err != nil {
+		log.Fatalf("Error fetching RSS feed: %v", err)
+	}
+	fmt.Printf("Fetched RSS Feed: %+v\n", rssFeed)
 
 	godotenv.Load(".env")
 
